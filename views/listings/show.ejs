@@ -91,3 +91,99 @@
 
 <script src="/js/map.js"></script>
     
+<button id="bookNowBtn" class="btn btn-primary mb-3">Book Your Home</button>
+
+<style>
+  #bookNowBtn {
+transition: background-color 0.3s ease, color 0.3s ease;
+}
+#bookNowBtn.green {
+  background-color: #28a745 !important; /* green */
+  border-color: #28a745 !important;
+}
+#bookNowBtn.red {
+  background-color: #dc3545 !important; /* red */
+  border-color: #dc3545 !important;
+}
+</style>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+  document.getElementById("bookNowBtn").onclick = async function() {
+    const isLoggedIn = <%= currUser ? true : false %>;
+    const bookNowBtn = document.getElementById("bookNowBtn");
+      bookNowBtn.classList.remove("green", "red");
+
+    if (!isLoggedIn) {
+      bookNowBtn.classList.add("red");
+      alert("⚠️ You must be logged in to book your home!");
+      window.location.href = "/login";
+      return;
+    }
+
+    bookNowBtn.classList.remove("red");
+    bookNowBtn.classList.add("green");
+
+
+    try {
+      const amount = "<%= listing.price %>" * 1.18;
+
+      const res = await fetch("/payment/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount }),
+      });
+
+      if (res.status === 401) {
+      const data = await res.json();
+      window.location.href = data.redirect;
+      return;
+    }
+
+      if (!res.ok) {
+        throw new Error("Server returned an error");
+      }
+
+      const order = await res.json();
+
+      const options = {
+        key: "<%= process.env.RAZORPAY_KEY_ID %>",
+        amount: order.amount,
+        currency: order.currency,
+        name: "Wanderlust Booking",
+        description: "Payment for booking your stay",
+        order_id: order.orderId,
+        handler: async function (response) {
+          const verifyRes = await fetch("/payment/verify-payment", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(response),
+          });
+
+          const verifyData = await verifyRes.json();
+          if (verifyData.success) {
+            window.location.href = verifyData.redirectUrl;
+          } else {
+            alert("Payment verification failed!");
+          }
+        },
+        theme: {
+          color: "#3399cc",
+        },
+      };
+
+      const rzp1 = new Razorpay(options);
+      rzp1.open();
+    } catch (err) {
+      console.error("Error initiating payment:", err);
+      alert("Error initiating payment. Please try again later.");
+       bookNowBtn.classList.remove("green");
+      bookNowBtn.classList.add("red");
+    }finally {
+      // reset after a few seconds
+      setTimeout(() => {
+        bookNowBtn.classList.remove("green", "red");
+      }, 3000);
+    }
+  };
+</script>

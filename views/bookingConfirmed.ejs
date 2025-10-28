@@ -1,0 +1,14 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container text-center mt-5">
+  <h1 class="text-success">🎉 Booking Confirmed!</h1>
+  <p class="lead">Your payment was successful.</p>
+
+  <% if (query.order_id) { %>
+    <p><strong>Order ID:</strong> <%= query.order_id %></p>
+  <% } %>
+  
+  <a href="/listings" class="btn btn-primary mt-3">Back to Listings</a>
+</div>
+
+

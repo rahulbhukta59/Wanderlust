@@ -20,6 +20,7 @@ const listingsRouter = require("./routes/listing.js");
 const reviewsRouter = require("./routes/review.js");
 const userRouter = require("./routes/user.js");
 const { connect } = require('http2');
+const paymentRoutes = require("./routes/payment.js"); 
 
 // const MONGO_URL="mongodb://127.0.0.1:27017/wanderlust";
 const dbUrl =process.env.ATLASDB_URL;
@@ -42,6 +43,7 @@ app.set("views",path.join(__dirname,"views"));
 app.use(express.urlencoded({extended:true}));
 app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname,"/public")));
+app.use(express.json());
 
 const store =MongoStore.create({
     mongoUrl: dbUrl,
@@ -82,24 +84,21 @@ passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
 app.use((req,res,next) =>{
+    res.locals.currUser = req.user;
     res.locals.success = req.flash("success");
     res.locals.error = req.flash("error");
-    res.locals.currUser = req.user;
     next();
 });
 
-// app.get("/demouser", async(req,res) =>{
-//     let fakeUser = new User({
-//         email : "student@gmail.com",
-//         username : "delta-student"
-//     });
-//     let registeredUser = await User.register(fakeUser,"helloworld");
-//     res.send(registeredUser);
-// });
 
 app.use("/listings",listingsRouter);
 app.use("/listings/:id/reviews",reviewsRouter);
 app.use("/",userRouter);
+app.use("/payment", paymentRoutes); 
+
+app.get("/booking/confirmed", (req, res) => {
+  res.render("bookingConfirmed",{ query: req.query }); // this will render bookingConfirmed.ejs
+});
 
 app.use((req,res,next) =>{
     next(new ExpressError(404,"Page Not Found!"));

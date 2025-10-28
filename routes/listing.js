@@ -8,6 +8,26 @@ const multer  = require('multer');
 const {storage} = require("../cloudConfig.js");
 const upload = multer({storage });
 
+// 🔍 Search listings route
+router.get("/search", wrapAsync(async (req, res) => {
+  const query = req.query.q?.trim();
+  if (!query) {
+    return res.render("listings/searchResults.ejs", { listings: [], query: "" });
+  }
+
+  // Case-insensitive search for title, location, or country
+  const listings = await Listing.find({
+    $or: [
+      { title: new RegExp(query, "i") },
+      { location: new RegExp(query, "i") },
+      { country: new RegExp(query, "i") }
+    ]
+  });
+
+
+  res.render("listings/searchResults.ejs", { listings, query });
+}));
+
 
 router.route("/")
    .get(wrapAsync(listingController.index))
@@ -25,5 +45,6 @@ router.route("/:id")
 
 //Edit Route
 router.get("/:id/edit",isLoggedIn, isOwner, wrapAsync(listingController.renderEditForm));
+
 
 module.exports = router;

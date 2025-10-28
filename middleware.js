@@ -4,17 +4,19 @@ const ExpressError =require("./utils/ExpressError.js");
 const {listingSchema,reviewSchema}=require("./schema.js");
 
 module.exports.isLoggedIn = (req,res,next) =>{
-     if(!req.isAuthenticated()){
-        req.session.redirectUrl = req.originalUrl;
-        req.flash("error","You must be logged in to complete this action!");
-        return res.redirect("/login");
+    if (!req.isAuthenticated || !req.isAuthenticated()) {
+    if (req.xhr || req.headers.accept.includes('application/json')) {
+      return res.status(401).json({ error: "Not logged in", redirect: "/login" });
     }
-    next();
+    req.flash("error", "You are not eligible to perform this action. Please log in first!");
+    return res.redirect("/login");
+  }
+  next();
 };
 
 module.exports.saveRedirectUrl = (req,res,next) =>{
-    if (req.session.redirectUrl){
-        res.locals.redirectUrl = req.session.redirectUrl;
+    if (req.session.returnTo){
+        res.locals.returnTo = req.session.returnTo;
     }
     next();
 };
