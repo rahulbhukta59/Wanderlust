@@ -38,8 +38,6 @@ async function main(){
    await mongoose.connect(dbUrl,{
     ssl: true,
       tlsAllowInvalidCertificates: true,
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
     });
     console.log("✅ Connected to MongoDB Atlas successfully");
   } catch (err) {
