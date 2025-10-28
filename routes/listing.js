@@ -10,12 +10,7 @@ const upload = multer({storage });
 
 // 🔍 Search listings route
 router.get("/search", wrapAsync(async (req, res) => {
-  const query = req.query.q?.trim();
-  if (!query) {
-    return res.render("listings/searchResults.ejs", { listings: [], query: "" });
-  }
-
-  // Case-insensitive search for title, location, or country
+  const query = req.query.q?.trim() || "";
   const listings = await Listing.find({
     $or: [
       { title: new RegExp(query, "i") },
@@ -24,9 +19,9 @@ router.get("/search", wrapAsync(async (req, res) => {
     ]
   });
 
-
   res.render("listings/searchResults.ejs", { listings, query });
 }));
+    
 
 
 router.route("/")

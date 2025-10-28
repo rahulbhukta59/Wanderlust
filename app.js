@@ -104,6 +104,11 @@ app.use((req,res,next) =>{
     next();
 });
 
+app.use((req, res, next) => {
+  res.locals.query = "";
+  next();
+});
+
 
 app.use("/listings",listingsRouter);
 app.use("/listings/:id/reviews",reviewsRouter);
