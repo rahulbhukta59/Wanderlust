@@ -30,7 +30,7 @@
     "express-session": "^1.18.2",
     "joi": "^17.13.3",
     "method-override": "^3.0.0",
-    "mongoose": "^8.3.4",
+    "mongoose": "^7.6.3",
     "multer": "^2.0.2",
     "multer-storage-cloudinary": "^4.0.0",
     "nodemon": "^3.1.10",
