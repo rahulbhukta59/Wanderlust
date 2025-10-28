@@ -25,17 +25,28 @@ const paymentRoutes = require("./routes/payment.js");
 // const MONGO_URL="mongodb://127.0.0.1:27017/wanderlust";
 const dbUrl =process.env.ATLASDB_URL;
 
-main()
-.then(() =>{
-    console.log("connected to DB");
-})
-.catch(err =>{
-    console.log(err);
-});
+// main()
+// .then(() =>{
+//     console.log("connected to DB");
+// })
+// .catch(err =>{
+//     console.log(err);
+// });
 
 async function main(){
-   await mongoose.connect(dbUrl);
+    try{
+   await mongoose.connect(dbUrl,{
+    ssl: true,
+      tlsAllowInvalidCertificates: true,
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log("✅ Connected to MongoDB Atlas successfully");
+  } catch (err) {
+    console.error("❌ MongoDB connection error:", err);
+  }
 }
+ main();
 
 app.engine("ejs",ejsMate);
 app.set("view engine","ejs");
@@ -103,6 +114,10 @@ app.use("/payment", paymentRoutes);
 
 app.get("/booking/confirmed", (req, res) => {
   res.render("bookingConfirmed",{ query: req.query }); // this will render bookingConfirmed.ejs
+});
+
+app.get("/", (req, res) => {
+    res.redirect("/listings");
 });
 
 app.use((req,res,next) =>{
