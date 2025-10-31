@@ -2,6 +2,7 @@ const express = require("express");
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
 const { isLoggedIn } = require("../middleware");
+const Booking = require("../models/booking");
 
 const router = express.Router();
 const paymentController = require("../controllers/payments");

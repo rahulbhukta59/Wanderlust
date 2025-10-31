@@ -83,6 +83,72 @@
       </div>
     <% } %>
       </div>
+
+       <!-- Booking Form -->
+    <% if(currUser) { %>
+      <hr>
+      <h4>Book Your Stay</h4>
+      <form id="bookingForm" class="booking-form mt-3 mb-3">
+        <div class="row mb-2">
+          <div class="col-md-5">
+            <label>Check-in Date:</label>
+            <input type="date" name="checkIn" class="form-control" required>
+          </div>
+          <div class="col-md-5">
+            <label>Check-out Date:</label>
+            <input type="date" name="checkOut" class="form-control" required>
+          </div>
+        </div>
+       <button type="submit" class="btn btn-dark">Confirm Dates</button>
+      </form>
+      
+     <script>
+    const today = new Date().toISOString().split("T")[0];
+    const checkInInput = document.querySelector("[name='checkIn']");
+    const checkOutInput = document.querySelector("[name='checkOut']");
+    const bookingForm = document.getElementById("bookingForm");
+    const bookBtn = document.getElementById("bookNowBtn");
+
+    checkInInput.setAttribute("min", today);
+    checkOutInput.setAttribute("min", today);
+
+     bookingForm.addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const checkIn = checkInInput.value;
+      const checkOut = checkOutInput.value;
+
+      if (!checkIn || !checkOut) {
+        alert("Please select check-in and check-out dates first!");
+        return;
+      }
+
+      const checkInDate = new Date(checkIn);
+      const checkOutDate = new Date(checkOut);
+
+      if (checkOutDate <= checkInDate) {
+        alert("Check-out date must be after check-in date!");
+        return;
+      }
+     
+      // ✅ Button effect on click
+      const confirmBtn = bookingForm.querySelector("button[type='submit']");
+      confirmBtn.classList.add("clicked");
+      setTimeout(() => confirmBtn.classList.remove("clicked"), 1000);
+
+      // ✅ Smooth scroll + Book Now highlight
+      setTimeout(() => {
+        bookBtn.scrollIntoView({ behavior: "smooth", block: "center" });
+        bookBtn.classList.add("highlight");
+        setTimeout(() => bookBtn.classList.remove("highlight"), 1500);
+      }, 300);
+    });
+  </script>
+  <% } else { %>
+  <p class="mt-3"><a href="/login"><b style="font-size: large;">Login</a> to make a booking.</b></p></p>
+<% } %>
+ 
+
       <div class="col-8 offset-3 mb-3">
           <h3>Where you'll be</h3>
           <div id="map"></div>
@@ -90,6 +156,8 @@
     </div>
 
 <script src="/js/map.js"></script>
+
+
     
 <button id="bookNowBtn" class="btn btn-primary mb-3">Book Your Home</button>
 
@@ -105,6 +173,23 @@ transition: background-color 0.3s ease, color 0.3s ease;
   background-color: #dc3545 !important; /* red */
   border-color: #dc3545 !important;
 }
+
+#bookNowBtn.highlight {
+    animation: pulse 0.8s ease-in-out 2;
+  }
+  @keyframes pulse {
+    0% { transform: scale(1); background-color: #007bff; }
+    50% { transform: scale(1.1); background-color: #0056b3; }
+    100% { transform: scale(1); background-color: #007bff; }
+  }
+   /* ✨ Confirm Dates Button Effect */
+  .booking-form button.clicked {
+    background-color: #198754 !important;
+    color: #fff !important;
+    box-shadow: 0 0 15px #198754;
+    transform: scale(1.05);
+    transition: all 0.3s ease;
+  }
 </style>
 
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
@@ -112,6 +197,7 @@ transition: background-color 0.3s ease, color 0.3s ease;
   document.getElementById("bookNowBtn").onclick = async function() {
     const isLoggedIn = <%= currUser ? true : false %>;
     const bookNowBtn = document.getElementById("bookNowBtn");
+     
       bookNowBtn.classList.remove("green", "red");
 
     if (!isLoggedIn) {
@@ -121,12 +207,30 @@ transition: background-color 0.3s ease, color 0.3s ease;
       return;
     }
 
-    bookNowBtn.classList.remove("red");
+     const checkIn = document.querySelector("[name='checkIn']").value;
+     const checkOut =  document.querySelector("[name='checkOut']").value;
+
+  
+     if (!checkIn || !checkOut) {
+      alert("Please select check-in and check-out dates first.");
+      return;
+    }
+
+    const checkInDate = new Date(checkIn);
+    const checkOutDate = new Date(checkOut);
+    const days = Math.floor((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
+
+    if (days <= 0) {
+      alert("Invalid date selection!");
+      return;
+    }
+
+    const pricePerNight = <%= listing.price %>;
+    const amount = Math.round(pricePerNight * days * 1.18);
+
     bookNowBtn.classList.add("green");
 
-
     try {
-      const amount = "<%= listing.price %>" * 1.18;
 
       const res = await fetch("/payment/create-order", {
         method: "POST",
@@ -140,11 +244,8 @@ transition: background-color 0.3s ease, color 0.3s ease;
       return;
     }
 
-      if (!res.ok) {
-        throw new Error("Server returned an error");
-      }
+     const order = await res.json();
 
-      const order = await res.json();
 
       const options = {
         key: "<%= process.env.RAZORPAY_KEY_ID %>",
@@ -177,7 +278,6 @@ transition: background-color 0.3s ease, color 0.3s ease;
     } catch (err) {
       console.error("Error initiating payment:", err);
       alert("Error initiating payment. Please try again later.");
-       bookNowBtn.classList.remove("green");
       bookNowBtn.classList.add("red");
     }finally {
       // reset after a few seconds

@@ -4,7 +4,7 @@ const ExpressError =require("./utils/ExpressError.js");
 const {listingSchema,reviewSchema}=require("./schema.js");
 
 module.exports.isLoggedIn = (req,res,next) =>{
-    if (!req.isAuthenticated || !req.isAuthenticated()) {
+    if (!req.isAuthenticated()) {
     if (req.xhr || req.headers.accept.includes('application/json')) {
       return res.status(401).json({ error: "Not logged in", redirect: "/login" });
     }

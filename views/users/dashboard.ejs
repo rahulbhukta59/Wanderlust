@@ -1,0 +1,84 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container mt-5">
+  <h2 class="text-center fw-bold mb-5">
+    Welcome, <%= user.username %> 👋
+  </h2>
+
+  <div class="text-center mb-4">
+    <p class="text-muted">Here’s a summary of your recent bookings.</p>
+  </div>
+</div>
+
+  <% if (current.length > 0 || upcoming.length > 0 || past.length > 0) { %>
+
+    <!-- ✅ CURRENT BOOKINGS -->
+    <% if (current.length > 0) { %>
+      <h4 class="mb-3 text-success">Current Bookings</h4>
+      <div class="row mb-5">
+        <% current.forEach(b => { %>
+          <div class="col-md-4 mb-4">
+            <div class="card shadow-sm h-100">
+              <img src="<%= b.listing.image.url %>" class="card-img-top" alt="<%= b.listing.title %>">
+              <div class="card-body">
+                <h5 class="card-title"><%= b.listing.title %></h5>
+                <p class="card-text"><strong>Location:</strong> <%= b.listing.location %></p>
+                <p class="card-text"><strong>Check-In:</strong> <%= b.checkIn.toDateString() %></p>
+                <p class="card-text"><strong>Check-Out:</strong> <%= b.checkOut.toDateString() %></p>
+                <p class="card-text text-success fw-bold">Ongoing Stay</p>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+
+    <!-- ✅ UPCOMING BOOKINGS -->
+    <% if (upcoming.length > 0) { %>
+      <h4 class="mb-3 text-primary">Upcoming Bookings</h4>
+      <div class="row mb-5">
+        <% upcoming.forEach(b => { %>
+          <div class="col-md-4 mb-4">
+            <div class="card shadow-sm h-100">
+              <img src="<%= b.listing.image.url %>" class="card-img-top" alt="<%= b.listing.title %>">
+              <div class="card-body">
+                <h5 class="card-title"><%= b.listing.title %></h5>
+                <p class="card-text"><strong>Location:</strong> <%= b.listing.location %></p>
+                <p class="card-text"><strong>Check-In:</strong> <%= b.checkIn.toDateString() %></p>
+                <p class="card-text"><strong>Check-Out:</strong> <%= b.checkOut.toDateString() %></p>
+                <p class="card-text text-primary fw-bold">Coming Soon</p>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+
+    <!-- ✅ PAST BOOKINGS -->
+    <% if (past.length > 0) { %>
+      <h4 class="mb-3 text-secondary">Past Bookings</h4>
+      <div class="row">
+        <% past.forEach(b => { %>
+          <div class="col-md-4 mb-4">
+            <div class="card shadow-sm h-100">
+              <img src="<%= b.listing.image.url %>" class="card-img-top" alt="<%= b.listing.title %>">
+              <div class="card-body">
+                <h5 class="card-title"><%= b.listing.title %></h5>
+                <p class="card-text"><strong>Location:</strong> <%= b.listing.location %></p>
+                <p class="card-text"><strong>Check-In:</strong> <%= b.checkIn.toDateString() %></p>
+                <p class="card-text"><strong>Check-Out:</strong> <%= b.checkOut.toDateString() %></p>
+                <p class="card-text text-muted fw-bold">Stay Completed</p>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+
+  <% } else { %>
+    <div class="text-center mt-5">
+      <h5 class="text-muted">You have no bookings yet.</h5>
+      <a href="/listings" class="btn btn-primary mt-3">Book Your First Stay</a>
+    </div>
+  <% } %>
+</div>

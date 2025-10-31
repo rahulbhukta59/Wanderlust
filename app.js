@@ -21,27 +21,20 @@ const reviewsRouter = require("./routes/review.js");
 const userRouter = require("./routes/user.js");
 const { connect } = require('http2');
 const paymentRoutes = require("./routes/payment.js"); 
+const bookingRoutes = require("./routes/booking");
 
 // const MONGO_URL="mongodb://127.0.0.1:27017/wanderlust";
-const dbUrl =process.env.ATLASDB_URL;
-
-// main()
-// .then(() =>{
-//     console.log("connected to DB");
-// })
-// .catch(err =>{
-//     console.log(err);
-// });
+const dbUrl =process.env.ATLASDB_URL || "mongodb://127.0.0.1:27017/wanderlust";
 
 async function main(){
     try{
    await mongoose.connect(dbUrl,{
-    ssl: true,
-      tlsAllowInvalidCertificates: true,
+    ssl: dbUrl.includes("mongodb+srv"),
+    tlsAllowInvalidCertificates: true,
     });
-    console.log("✅ Connected to MongoDB Atlas successfully");
+    console.log( `✅ Connected to MongoDB: ${dbUrl.includes("mongodb+srv") ? "Atlas" : "Local Wanderlust"}`);
   } catch (err) {
-    console.error("❌ MongoDB connection error:", err);
+    console.error("MongoDB connection error:", err);
   }
 }
  main();
@@ -105,15 +98,17 @@ app.use((req,res,next) =>{
 });
 
 app.use((req, res, next) => {
-  res.locals.query = "";
+  res.locals.user = req.user;
   next();
 });
 
 
 app.use("/listings",listingsRouter);
 app.use("/listings/:id/reviews",reviewsRouter);
-app.use("/",userRouter);
+app.use("/listings/:id/bookings", bookingRoutes); 
+app.use("/bookings", bookingRoutes);
 app.use("/payment", paymentRoutes); 
+app.use("/",userRouter);
 
 app.get("/booking/confirmed", (req, res) => {
   res.render("bookingConfirmed",{ query: req.query }); // this will render bookingConfirmed.ejs
@@ -123,16 +118,22 @@ app.get("/", (req, res) => {
     res.redirect("/listings");
 });
 
-app.use((req,res,next) =>{
-    next(new ExpressError(404,"Page Not Found!"));
+app.use((req, res) => {
+  res.status(404).render("error.ejs", { message: "Page Not Found!" });
 });
 
-app.use((err,req,res,next) =>{
-    console.error("🔥 INTERNAL SERVER ERROR:", err);  // 👈 Add this line
-    let {statusCode =500, message="Something went wrong!"} =err;
-    res.status(statusCode).render("error.ejs",{message});
-    // res.status(statusCode).send(message);
-}); 
+app.use((err, req, res, next) => {
+  const { statusCode = 500 } = err;
+  if (statusCode === 404) {
+    console.warn("⚠️ 404 - Page Not Found:", req.originalUrl);
+  } else {
+    console.error("🔥 INTERNAL SERVER ERROR:", err);
+  }
+
+  if (!err.message) err.message = "Something went wrong!";
+  res.status(statusCode).render("error.ejs", { message: err.message });
+});
+
 
 app.listen(8080,() =>{
     console.log("server is listening to port 8080");

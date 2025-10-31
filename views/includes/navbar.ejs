@@ -39,15 +39,19 @@
     </form>
       </div>
       <div class="navbar-nav ms-auto">
-        <a class="nav-link" href="/listings/new">Airbnb your home</a> 
-        <%  if(!currUser) { %>
-        <a class="nav-link " href="/signup"><b>Sign up</b></a>
-        <a class="nav-link" href="/login"><b>Log in</b></a>
-        <% } %>
-        <%  if(currUser) { %>
-        <a class="nav-link" href="/logout"><b>Log out</b></a> 
-        <% } %>
-      </div>
+  <a class="nav-link" href="/listings/new">Airbnb your home</a>
+
+  <% if (!currUser) { %>
+    <a class="nav-link" href="/signup"><b>Sign up</b></a>
+    <a class="nav-link" href="/login"><b>Log in</b></a>
+  <% } %>
+
+  <% if (currUser) { %>
+    <!-- 👇 NEW LINK for Dashboard -->
+    <a class="nav-link" href="/dashboard"><b>My Dashboard</b></a>
+    <a class="nav-link" href="/logout"><b>Log out</b></a>
+  <% } %>
+</div>
     </div>
   </div>
 </nav>
