@@ -38,12 +38,6 @@ const listingSchema = new Schema({
         required: true,
     },
 },
-bookings: [
-  {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Booking",
-  }
-],
 
 });
 

@@ -99,7 +99,6 @@
             <input type="date" name="checkOut" class="form-control" required>
           </div>
         </div>
-       <button type="submit" class="btn btn-dark">Confirm Dates</button>
       </form>
       
      <script>
@@ -130,18 +129,6 @@
         alert("Check-out date must be after check-in date!");
         return;
       }
-     
-      // ✅ Button effect on click
-      const confirmBtn = bookingForm.querySelector("button[type='submit']");
-      confirmBtn.classList.add("clicked");
-      setTimeout(() => confirmBtn.classList.remove("clicked"), 1000);
-
-      // ✅ Smooth scroll + Book Now highlight
-      setTimeout(() => {
-        bookBtn.scrollIntoView({ behavior: "smooth", block: "center" });
-        bookBtn.classList.add("highlight");
-        setTimeout(() => bookBtn.classList.remove("highlight"), 1500);
-      }, 300);
     });
   </script>
   <% } else { %>
@@ -232,6 +219,21 @@ transition: background-color 0.3s ease, color 0.3s ease;
 
     try {
 
+      const bookingResponse = await fetch("/listings/<%=listing._id %>/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+         checkIn: checkIn,
+          checkOut: checkOut ,
+           amount:amount ,
+      })
+      });
+
+      if (!bookingResponse.ok) {
+        throw new Error("Failed to create booking");
+      }
+
+      // Then proceed with payment
       const res = await fetch("/payment/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

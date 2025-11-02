@@ -16,5 +16,4 @@ router.get("/mybookings", isLoggedIn, wrapAsync(bookingController.showUserBookin
 // Route to cancel a booking
 router.delete("/:id", isLoggedIn, wrapAsync(bookingController.cancelBooking));
 
-
 module.exports = router;

@@ -15,6 +15,16 @@ module.exports.createBooking = async (req, res) => {
       return res.redirect("/listings");
     }
 
+    if (
+      !checkIn ||
+      !checkOut ||
+      isNaN(new Date(checkIn)) ||
+      isNaN(new Date(checkOut))
+    ) {
+      req.flash("error", "Invalid date format!");
+      return res.redirect(`/listings/${id}`);
+    }
+
     const checkInDate = new Date(checkIn);
     const checkOutDate = new Date(checkOut);
     const timeDiff = (checkOutDate - checkInDate);
@@ -74,4 +84,15 @@ module.exports.dashboard = async (req, res) => {
   res.render("users/dashboard.ejs", { bookings });
 };
 
-
+module.exports.cancelBooking = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await Booking.findByIdAndDelete(id);
+    req.flash("success", "Booking canceled successfully!");
+    res.redirect("/dashboard");
+  } catch (err) {
+    console.error("❌ Error canceling booking:", err);
+    req.flash("error", "Failed to cancel booking.");
+    res.redirect("/bookings/mybookings");
+  }
+};

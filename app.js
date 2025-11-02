@@ -18,7 +18,7 @@ const User = require("./models/user.js");
 
 const listingsRouter = require("./routes/listing.js");
 const reviewsRouter = require("./routes/review.js");
-const userRouter = require("./routes/user.js");
+const userRoutes = require("./routes/user.js");
 const { connect } = require('http2');
 const paymentRoutes = require("./routes/payment.js"); 
 const bookingRoutes = require("./routes/booking");
@@ -55,7 +55,7 @@ const store =MongoStore.create({
     touchAfter: 24*3600,
 });
 
-store.on("error",() =>{
+store.on("error",(err) =>{
     console.log("ERROR in MONGO SESSION STORE",err);
 });
 
@@ -108,7 +108,7 @@ app.use("/listings/:id/reviews",reviewsRouter);
 app.use("/listings/:id/bookings", bookingRoutes); 
 app.use("/bookings", bookingRoutes);
 app.use("/payment", paymentRoutes); 
-app.use("/",userRouter);
+app.use("/",userRoutes);
 
 app.get("/booking/confirmed", (req, res) => {
   res.render("bookingConfirmed",{ query: req.query }); // this will render bookingConfirmed.ejs
